@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
+use Log;
 class UsersController extends Controller
 {
     /**
@@ -12,18 +13,28 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //per elencare gli utenti
         // return User::all();
 
+        $take = $request->input('take', 10);
+        $skip = $request->input('skip', 0);
+        
         $res = [
             'result' => [],
             'message' =>'',
-            'status' => true
+            'status' => true,
+            'records'=> 0
         ];
         try{
-            $res['result'] = User::all();
+            $user=new User();
+            $user=$user->skip($skip)->take($take);
+            $user=$user->get();
+            $res['result'] = $user;
+            $records = User::all()->count();
+            $res['records'] = $records;
+
         } catch(\Exception $e){
             $res['message'] = $e->getMessage();
             $res['status'] = false;
